@@ -37,12 +37,11 @@ class Game{
             if(!moved)i--;
         }
     }
-
     moveBlock(blockIdx){
         let block=this.blocks[blockIdx];
         let blockCoords=this.canMoveBlock(block);
         if(blockCoords!=null){
-            this.positionBlockAtCoord(blockIdx,this.emptyBlockCoords[0].this.emptyBlockCoords[1]);
+            this.positionBlockAtCoord(blockIdx,this.emptyBlockCoords[0],this.emptyBlockCoords[1]);
             this.indexes[this.emptyBlockCoords[0]+this.emptyBlockCoords[1]*this.cols]=this.indexes[blockCoords[0]+blockCoords[1]*this.cols];
             this.emptyBlockCoords[0]=blockCoords[0];
             this.emptyBlockCoords[1]=blockCoords[1];
@@ -57,6 +56,50 @@ class Game{
         let diff=[Math.abs(blockCoords[0]-this.emptyBlockCoords[0]),Math.abs(blockCoords[1] - this.emptyBlockCoords[1])];
         let canMove=(diff[0]==1&&diff[1]==0)||(diff[0]==0&&diff[1]);
         if(canMove)return blockCoords;
-        else return null
+        else return null;
+    }
+    positionBlockAtCoord(blockIdx){
+
+    }
+    
+    positionBlockAtCoord(blockIdx,x,y){
+        let block=this.blocks[blockIdx];
+        block.style.left=(x*block.clientWidth)+"px";
+        block.style.top=(y*block.clientWidth)+"px";
+    }
+
+
+
+    onClickOnBlock(blockIdx){
+        if(this.moveBlock(blockIdx)){
+            if(this.checkPuzzleSolved()){
+                sectTimeout(()=>alert("Rompecabezas resuelto!!"), 600);
+            }
+        }
+    }
+
+    checkPuzzleSolved(){//regresar si se resolvio el rompecabezas
+        for(let i=0; i<this.indexes.length; i++){
+            if(i==this.emptyBlockCoords[0]+this.emptyBlockCoords[1]*this.cols)continue;
+            if(this.indexes[i]!=i)return false;
+        }
+        return true;
+    }
+
+    setDifficulty(difficultylevel){//establecer dificultad
+        this.difficulty=GameDifficulty[difficultylevel-1];
+        this.randomize(this.difficulty);
     }
 }
+
+var game=new Game(1);//crear una instancia de un nuevo juego
+
+//ciudando los botones de dificultad
+var difficulty_buttons=Array.from(document.getElementsByClassName("difficulty_button"));
+difficulty_buttons.forEach((elem,idx)=>{
+    elem.addEventListener('click',(e)=>{
+        difficulty_buttons[GameDifficulty.indexOf(game.difficulty)].classList.remove("active");
+        elem.classList.add("active");
+        game.setDifficulty(idx+1);
+    });
+});
